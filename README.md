@@ -1,2 +1,5 @@
 # advent-of-code
-The Advent of Code: https://adventofcode.com/.
+
+Using the Advent of Code as a means to learn/practice Rust.
+
+([Advent of Code](https://adventofcode.com/))
