@@ -1,5 +1,6 @@
 use std::num::ParseIntError;
 
+#[allow(dead_code)]
 fn problem_3(input: &[&str]) -> i32 {
     let mut count = 0;
     for pwd in input {

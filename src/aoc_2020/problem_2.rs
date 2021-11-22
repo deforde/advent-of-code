@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use crate::aoc_2020::problem_1::problem_1;
 
 #[cfg(test)]

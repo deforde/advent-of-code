@@ -3,18 +3,15 @@ pub fn problem_1(input: &[i32], sum: &i32, n: i32) -> Option<i32> {
     for i in 0..input.len() {
         let x = input[i];
         let y = sum - x;
+        let result: Option<i32>;
         if n == 2 {
-            let result = input[i..].into_iter().find(|j| **j == y);
-            match result {
-                Some(product) => return Some(x * product),
-                _ => (),
-            }
+            result = input[i..].into_iter().find(|j| **j == y).copied();
         } else {
-            let result = problem_1(&input[i..], &y, n - 1);
-            match result {
-                Some(product) => return Some(x * product),
-                _ => (),
-            }
+            result = problem_1(&input[i..], &y, n - 1);
+        }
+        match result {
+            Some(product) => return Some(x * product),
+            _ => (),
         }
     }
 
