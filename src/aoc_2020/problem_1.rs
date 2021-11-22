@@ -2,12 +2,13 @@
 pub fn problem_1(input: &[i32], sum: &i32, n: i32) -> Option<i32> {
     for i in 0..input.len() {
         let x = input[i];
+        let n_remaining = n - 1;
         let y = sum - x;
         let result: Option<i32>;
-        if n == 2 {
+        if n_remaining == 1 {
             result = input[i..].into_iter().find(|j| **j == y).copied();
         } else {
-            result = problem_1(&input[i..], &y, n - 1);
+            result = problem_1(&input[i..], &y, n_remaining);
         }
         match result {
             Some(product) => return Some(x * product),
