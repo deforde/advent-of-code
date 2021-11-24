@@ -1,4 +1,4 @@
-mod problem_1;
-mod problem_2;
-mod problem_3;
-mod problem_4;
+mod day_1_part_1;
+mod day_1_part_2;
+mod day_2_part_1;
+mod day_2_part_2;
