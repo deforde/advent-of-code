@@ -1,4 +1,3 @@
-use crate::aoc_2021::day_3_part_1::get_sums;
 use crate::aoc_2021::day_3_part_1::get_gamma_epsilon;
 
 #[allow(dead_code)]
@@ -8,18 +7,14 @@ fn day_3_part_2(input: &[&str]) -> u64 {
 
     for pos in 0..input[0].len() {
         if oxy_data.len() > 1 {
-            let sums = get_sums(&oxy_data);
-            let num_nums = oxy_data.len() as u64;
-            let (gamma, _) = get_gamma_epsilon(&sums, num_nums);
+            let (gamma, _) = get_gamma_epsilon(&oxy_data);
 
             let oxy_ch = if ((gamma >> (input[0].len() - 1 - pos)) & 1) == 1 { '1' } else { '0' };
             oxy_data = oxy_data.into_iter().filter(|&num| num.chars().nth(pos).unwrap() == oxy_ch).collect();
         }
 
         if co2_data.len() > 1 {
-            let sums = get_sums(&co2_data);
-            let num_nums = co2_data.len() as u64;
-            let (_, epsilon) = get_gamma_epsilon(&sums, num_nums);
+            let (_, epsilon) = get_gamma_epsilon(&co2_data);
 
             let co2_ch = if ((epsilon >> (input[0].len() - 1 - pos)) & 1) == 1 { '1' } else { '0' };
             co2_data = co2_data.into_iter().filter(|&num| num.chars().nth(pos).unwrap() == co2_ch).collect();

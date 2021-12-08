@@ -1,5 +1,5 @@
-#[allow(dead_code)]
-pub fn get_sums(input: &[&str]) -> Vec<u64> {
+pub fn get_gamma_epsilon(input: &[&str]) -> (u64, u64) {
+    let num_nums = input.len() as u64;
     let mut sums: Vec::<u64> = vec![0; input[0].len()];
 
     for num in input {
@@ -11,10 +11,6 @@ pub fn get_sums(input: &[&str]) -> Vec<u64> {
         }
     }
 
-    return sums;
-}
-
-pub fn get_gamma_epsilon(sums: &Vec<u64>, num_nums: u64) -> (u64, u64) {
     let mut gamma: u64 = 0;
     let mut epsilon: u64 = 0;
 
@@ -24,7 +20,7 @@ pub fn get_gamma_epsilon(sums: &Vec<u64>, num_nums: u64) -> (u64, u64) {
         gamma =  gamma << 1;
         epsilon =  epsilon << 1;
 
-        if num_ones >= &num_zeros {
+        if num_ones >= num_zeros {
             gamma |= 1;
         }
         else {
@@ -35,13 +31,9 @@ pub fn get_gamma_epsilon(sums: &Vec<u64>, num_nums: u64) -> (u64, u64) {
     return (gamma, epsilon);
 }
 
+#[allow(dead_code)]
 fn day_3_part_1(input: &[&str]) -> u64 {
-    let num_nums: u64 = input.len() as u64;
-    
-    let sums = get_sums(input);
-
-    let (gamma, epsilon) = get_gamma_epsilon(&sums, num_nums);
-
+    let (gamma, epsilon) = get_gamma_epsilon(input);
     return gamma * epsilon;
 }
 
