@@ -8,3 +8,5 @@ mod day_4_part_1;
 mod day_4_part_2;
 mod day_5_part_1;
 mod day_5_part_2;
+mod day_6_part_1;
+mod day_6_part_2;
