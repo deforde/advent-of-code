@@ -40,11 +40,10 @@ pub fn make_play(number: u64, blocks: &mut Vec::<Vec<Vec<(u64, bool)>>>) -> bool
 
     for block in blocks.iter_mut() {
         for row in block {
-            for num in row {
-                if num.0 == number {
-                    num.1 = true;
-                    board_updated = true;
-                }
+            if let Some(num) = row.iter_mut().find(|x| x.0 == number) {
+                num.1 = true;
+                board_updated = true;
+                break;
             }
         }
     }
