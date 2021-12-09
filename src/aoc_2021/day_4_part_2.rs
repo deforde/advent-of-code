@@ -1,99 +1,28 @@
-pub fn parse_input(input: &str) -> (Vec<u64>, Vec::<Vec<Vec<(u64, bool)>>>) {
-    let first_new_line_pos = input.find("\n\n").unwrap();
-    let numbers_string = &input[..first_new_line_pos];
-    let numbers: Vec<u64> = numbers_string.split(',').into_iter().map(|num_str| num_str.parse::<u64>().unwrap()).collect();
-
-    let mut blocks = Vec::<Vec<Vec<(u64, bool)>>>::new();
-    let mut start_search_pos = Some(first_new_line_pos + 2);
-    while start_search_pos != None {
-        let start_pos = start_search_pos.unwrap();
-
-        let next_line_break = input[start_pos..].find("\n\n");
-
-        let end_pos: usize;
-        match next_line_break {
-            Some(val) => {
-                end_pos = val + start_pos;
-                start_search_pos = Some(end_pos + 2);
-            }
-            _ => {
-                end_pos = input.len();
-                start_search_pos = None
-            }
-        }
-
-        let mut block = Vec::<Vec<(u64, bool)>>::new();
-        let block_string = &input[start_pos..end_pos];
-        let block_row_strings: Vec<&str> = block_string.split('\n').collect();
-        for block_row_string in block_row_strings {
-            let row: Vec<(u64, bool)> = block_row_string.split_whitespace().into_iter().map(|num_str| (num_str.parse::<u64>().unwrap(), false)).collect();
-            block.push(row);
-        }
-        blocks.push(block);
-    }
-
-    return (numbers, blocks)
-}
-
-pub fn make_play(number: u64, blocks: &mut Vec::<Vec<Vec<(u64, bool)>>>) -> bool {
-    let mut board_updated = false;
-
-    for block in blocks.iter_mut() {
-        for row in block {
-            for num in row {
-                if num.0 == number {
-                    num.1 = true;
-                    board_updated = true;
-                }
-            }
-        }
-    }
-
-    return board_updated;
-}
-
-pub fn has_board_won(blocks: &Vec::<Vec<Vec<(u64, bool)>>>) -> Option<usize> {
-    for (block_index, block) in blocks.iter().enumerate() {
-        for row in block {
-            if row.iter().all(|&x| x.1) {
-                return Some(block_index);
-            }
-        }
-        for col in 0..block[0].len() {
-            if block.iter().all(|row| row[col].1) {
-                return Some(block_index);
-            }
-        }
-    }
-
-    return None;
-}
-
-pub fn sum_unmarked_nums(block: &Vec<Vec<(u64, bool)>>) -> u64 {
-    let mut sum: u64 = 0;
-
-    for row in block {
-        sum += row.iter().filter(|&x| !x.1).map(|&x| x.0).sum::<u64>();
-    }
-
-    return sum;
-}
+use crate::aoc_2021::day_4_part_1::parse_input;
+use crate::aoc_2021::day_4_part_1::make_play;
+use crate::aoc_2021::day_4_part_1::has_board_won;
+use crate::aoc_2021::day_4_part_1::sum_unmarked_nums;
 
 #[allow(dead_code)]
-fn day_4_part_1(input: &str) -> u64 {
+fn day_4_part_2(input: &str) -> u64 {
     let (numbers, mut blocks) = parse_input(input);
+    let mut last_winning_block_product: u64 = 0;
 
     for number in numbers {
         let board_updated = make_play(number, &mut blocks);
         if board_updated {
-            if let Some(winning_board_index) = has_board_won(&blocks) {
+            while let Some(winning_board_index) = has_board_won(&blocks) {
                 let sum = sum_unmarked_nums(&blocks[winning_board_index]);
-                return sum * number;
+                last_winning_block_product = sum * number;
+                blocks.remove(winning_board_index);
             }
+        }
+        if blocks.is_empty() {
+            break;
         }
     }
 
-    return 0;
+    return last_winning_block_product;
 }
 
 #[cfg(test)]
@@ -101,7 +30,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_day_4_part_1() {
+    fn example_day_4_part_2() {
         let input =
 r#"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
@@ -123,13 +52,13 @@ r#"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 22 11 13  6  5
  2  0 12  3  7"#;
 
-        let ans = day_4_part_1(&input);
+        let ans = day_4_part_2(&input);
 
-        assert_eq!(ans, 4512);
+        assert_eq!(ans, 1924);
     }
 
     #[test]
-    fn test_day_4_part_1() {
+    fn test_day_4_part_2() {
         let input = 
 r#"68,30,65,69,5,78,41,73,55,0,76,98,79,42,37,21,9,34,56,33,64,54,24,43,15,58,61,38,12,20,4,26,87,95,94,89,83,74,97,77,67,40,63,88,19,31,81,80,60,14,18,47,93,57,17,90,84,85,48,6,91,7,86,13,51,53,8,16,23,66,36,39,32,82,72,11,52,28,62,70,59,50,1,46,96,71,35,10,25,22,27,99,29,45,44,3,75,92,49,2
 
@@ -733,8 +662,8 @@ r#"68,30,65,69,5,78,41,73,55,0,76,98,79,42,37,21,9,34,56,33,64,54,24,43,15,58,61
 92 68 21 74 55
  3 58 72 70 86"#;
 
-        let ans = day_4_part_1(&input);
+        let ans = day_4_part_2(&input);
 
-        assert_eq!(ans, 51776);
+        assert_eq!(ans, 16830);
     }
 }
