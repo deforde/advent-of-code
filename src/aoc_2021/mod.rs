@@ -24,3 +24,6 @@ mod day_8_part_2;
 
 mod day_9_part_1;
 mod day_9_part_2;
+
+mod day_10_part_1;
+mod day_10_part_2;
