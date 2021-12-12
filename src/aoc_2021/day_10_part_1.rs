@@ -27,10 +27,10 @@ fn day_10_part_1(input: &str) -> i64 {
         return *char_pairs.get(&ch).unwrap();
     };
 
-    let mut stack = Vec::<char>::new();
     let mut illegal_closing_chars = Vec::<char>::new();
 
     for line in input.split('\n') {
+        let mut stack = Vec::<char>::new();
         for ch in line.chars() {
             if is_opening_char(ch) {
                 stack.push(ch);
