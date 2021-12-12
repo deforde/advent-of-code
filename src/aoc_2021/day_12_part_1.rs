@@ -1,17 +1,17 @@
 #[derive(Debug)]
-enum CaveCategory {
+pub enum CaveCategory {
     Large,
     Small
 }
 
 #[derive(Debug)]
-struct Cave {
-    connections: Vec::<usize>,
-    name: String,
-    category: CaveCategory,
+pub struct Cave {
+    pub connections: Vec::<usize>,
+    pub name: String,
+    pub category: CaveCategory,
 }
 
-fn get_cave_index(cave_string: &str, caves: &mut Vec::<Cave>) -> usize {
+pub fn get_cave_index(cave_string: &str, caves: &mut Vec::<Cave>) -> usize {
     if let Some(extant_cave_index) = caves.into_iter().position(|cave| cave.name == cave_string) {
         return extant_cave_index;
     }
@@ -33,7 +33,7 @@ fn get_cave_index(cave_string: &str, caves: &mut Vec::<Cave>) -> usize {
     return caves.len() - 1;
 }
 
-fn parse_input(input: &str) -> Vec::<Cave> {
+pub fn parse_input(input: &str) -> Vec::<Cave> {
     let mut caves = Vec::<Cave>::new();
 
     for line in input.split('\n') {
