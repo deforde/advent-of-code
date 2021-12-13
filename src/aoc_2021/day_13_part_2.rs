@@ -21,9 +21,9 @@ fn day_13_part_2(input: &str) {
         max_y = usize::max(max_y, idx.1);
     }
 
-    let mut grid: Vec::<Vec<char>> = vec![vec![' '; max_y + 1]; max_x + 1];
+    let mut grid: Vec::<Vec<char>> = vec![vec![' '; max_x + 1]; max_y + 1];
     for idx in indices.iter() {
-        grid[idx.0][idx.1] = '#';
+        grid[idx.1][idx.0] = '#';
     }
 
     for row in grid {
