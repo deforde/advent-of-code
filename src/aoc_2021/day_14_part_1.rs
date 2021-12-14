@@ -10,12 +10,8 @@ fn parse_input(input: &str) -> (char, HashMap::<(char, char), usize>, HashMap::<
 
     for idx in 0..blocks[0].len() - 1 {
         let char_pair = (blocks[0].chars().nth(idx).unwrap(), blocks[0].chars().nth(idx + 1).unwrap());
-        if let Some(value) = polymer.get_mut(&char_pair) {
-            *value += 1;
-        }
-        else {
-            polymer.insert(char_pair, 1);
-        }
+        let count = polymer.entry(char_pair).or_insert(0);
+        *count += 1;
     }
 
     for insertion_rule in blocks[1].split('\n') {
@@ -43,19 +39,11 @@ pub fn day_14_part_1(input: &str, n_steps: usize) -> usize {
                 let new_pair_1 = (pair_key.0, *insertion_char);
                 let new_pair_2 = (*insertion_char, pair_key.1);
 
-                if let Some(value) = new_polymer.get_mut(&new_pair_1) {
-                    *value += count;
-                }
-                else {
-                    new_polymer.insert(new_pair_1, count);
-                }
+                let new_pair_1_count = new_polymer.entry(new_pair_1).or_insert(0);
+                *new_pair_1_count += count;
 
-                if let Some(value) = new_polymer.get_mut(&new_pair_2) {
-                    *value += count;
-                }
-                else {
-                    new_polymer.insert(new_pair_2, count);
-                }
+                let new_pair_2_count = new_polymer.entry(new_pair_2).or_insert(0);
+                *new_pair_2_count += count;
             }
         }
 
@@ -66,12 +54,8 @@ pub fn day_14_part_1(input: &str, n_steps: usize) -> usize {
         (first_char, 1),
     ]);
     for (pair_key, count) in polymer {
-        if let Some(value) = polymer_char_counts.get_mut(&pair_key.1) {
-            *value += count;
-        }
-        else {
-            polymer_char_counts.insert(pair_key.1, count);
-        }
+        let char_count = polymer_char_counts.entry(pair_key.1).or_insert(0);
+        *char_count += count;
     }
 
     let mut min_char_count: usize = usize::MAX;
