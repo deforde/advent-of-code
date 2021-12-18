@@ -48,7 +48,7 @@ fn add_to_first_num(string: &mut String, val: i64) {
     }
 }
 
-fn explode_snail(input: &mut String) -> bool {
+pub fn explode_snail(input: &mut String) -> bool {
     let mut output = String::new();
     let mut level: usize = 0;
     let mut last_bracket = ' ';
@@ -86,7 +86,7 @@ fn explode_snail(input: &mut String) -> bool {
     return updated;
 }
 
-fn split_snail(input: &mut String) -> bool {
+pub fn split_snail(input: &mut String) -> bool {
     let mut output = String::new();
     let mut num_start_idx: usize = 0;
     let mut accumulating_num_chars = false;
@@ -128,60 +128,35 @@ fn split_snail(input: &mut String) -> bool {
     return updated;
 }
 
-fn get_idx_of_split_num(input: &String) -> usize {
-    let mut num_start_idx: usize = 0;
-    let mut accumulating_num_chars = false;
-    let mut num_string = String::new();
-    
-    for (idx, ch) in input.chars().enumerate() {
-        if ch.is_digit(10) {
-            if !accumulating_num_chars {
-                accumulating_num_chars = true;
-                num_start_idx = idx;
-                num_string.clear();
-            }
-            num_string.push(ch);
-        }
-        else {
-            if accumulating_num_chars {
-                accumulating_num_chars = false;
-                if !num_string.is_empty() {
-                    let num = num_string.parse::<i64>().unwrap();
-                    if num > 9 {
-                        return num_start_idx;
-                    }
-                }
-            }
-        }
-    }
-
-    return usize::MAX;
-}
-
-fn get_idx_of_explode_num(input: &String) -> usize {
-    let mut output = String::new();
-    let mut level: usize = 0;
+pub fn get_snail_magnitude(input: &mut String) -> i64 {
     let mut last_bracket = ' ';
-    let mut idx_of_last_open_bracket: usize = 0;
+    let mut start_pair_idx: usize = 0;
+    let mut end_pair_idx: usize = 0;
 
     for (idx, ch) in input.chars().enumerate() {
-        output.push(ch);
         if ch == '[' {
-            level += 1;
             last_bracket = ch;
-            idx_of_last_open_bracket = idx;
+            start_pair_idx = idx;
         }
         else if ch == ']' {
-            if last_bracket == '[' && level > 4 {
-                return idx_of_last_open_bracket;
+            if last_bracket == '[' {
+                end_pair_idx = idx;
+                break;
             }
-
-            level -= 1;
             last_bracket = ch;
         }
     }
 
-    return usize::MAX;
+    if end_pair_idx != 0 {
+        let pair_string = &input[start_pair_idx + 1..end_pair_idx].split(',').collect::<Vec<_>>();
+        let val_1 = pair_string[0].parse::<i64>().unwrap();
+        let val_2 = pair_string[1].parse::<i64>().unwrap();
+        let mag = 3 * val_1 + 2 * val_2;
+        input.replace_range(start_pair_idx..end_pair_idx + 1, &mag.to_string());
+        get_snail_magnitude(input);
+    }
+
+    return input.parse::<i64>().unwrap();
 }
 
 #[allow(dead_code)]
@@ -199,35 +174,13 @@ fn day_18_part_1(input: &str) -> i64 {
         sum.push_str(line);
         sum.push(']');
 
-        let mut cont = true;
-        while cont {
-            cont = false;
-
-            let split_num_idx = get_idx_of_split_num(&sum);
-            let explode_num_idx = get_idx_of_explode_num(&sum);
-
-            if explode_num_idx < split_num_idx {
-                // Do explosions
-                let mut exploded = true;
-                // while exploded {
-                    exploded = explode_snail(&mut sum);
-                    cont |= exploded;
-                //}
-            }
-            else {
-                // Do split
-                let mut split = true;
-                //while split {
-                    split = split_snail(&mut sum);
-                    cont |= split;
-                //}
-            }
+        while explode_snail(&mut sum) || split_snail(&mut sum) {
         }
     }
 
-    println!("sum = {}\n", sum);
+    let ans = get_snail_magnitude(&mut sum);
 
-    return 0;
+    return ans;
 }
 
 #[cfg(test)]
@@ -235,81 +188,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_1_day_18_part_1() {
-        let input =
-r#"[1,1]
-[2,2]
-[3,3]
-[4,4]"#;
-
-        let ans = day_18_part_1(&input);
-
-        //assert_eq!(ans, 4140);
-    }
-
-    #[test]
-    fn example_2_day_18_part_1() {
-        let input =
-r#"[1,1]
-[2,2]
-[3,3]
-[4,4]
-[5,5]"#;
-
-        let ans = day_18_part_1(&input);
-
-        //assert_eq!(ans, 4140);
-    }
-
-    #[test]
-    fn example_3_day_18_part_1() {
-        let input =
-r#"[1,1]
-[2,2]
-[3,3]
-[4,4]
-[5,5]
-[6,6]"#;
-
-        let ans = day_18_part_1(&input);
-
-        //assert_eq!(ans, 4140);
-    }
-
-    #[test]
-    fn example_4_day_18_part_1() {
-        let input =
-r#"[[[[4,3],4],4],[7,[[8,4],9]]]
-[1,1]"#;
-
-        let ans = day_18_part_1(&input);
-
-        //assert_eq!(ans, 4140);
-    }
-
-    #[test]
-    fn example_5_day_18_part_1() {
-        let input =
-r#"[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]
-[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]"#;
-// r#"[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
-// [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]
-// [[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]
-// [[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]
-// [7,[5,[[3,8],[1,4]]]]
-// [[2,[2,2]],[8,[8,1]]]
-// [2,9]
-// [1,[[[9,3],9],[[9,0],[0,7]]]]
-// [[[5,[7,4]],7],1]
-// [[[[4,2],2],6],[8,7]]"#;
-
-        let ans = day_18_part_1(&input);
-
-        //assert_eq!(ans, 4140);
-    }
-
-    #[test]
-    fn example_6_day_18_part_1() {
+    fn example_day_18_part_1() {
         let input =
 r#"[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[5,[2,8]],4],[5,[[9,9],0]]]
@@ -324,7 +203,7 @@ r#"[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 
         let ans = day_18_part_1(&input);
 
-        //assert_eq!(ans, 4140);
+        assert_eq!(ans, 4140);
     }
 
     #[test]
@@ -433,6 +312,6 @@ r#"[[7,[1,5]],[[5,7],[[0,8],2]]]
 
         let ans = day_18_part_1(&input);
 
-        println!("{}", ans);
+        assert_eq!(ans, 3987);
     }
 }
