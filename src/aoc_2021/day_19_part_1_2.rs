@@ -76,15 +76,15 @@ fn get_sensor_mapping(s0: &Vec::<(i64, i64, i64)>, s1: &Vec::<(i64, i64, i64)>) 
 }
 
 #[allow(dead_code)]
-fn day_19_part_1(input: &str) -> usize {
+fn day_19_part_1_2(input: &str) -> (usize, i64) {
     let sensors = parse_input(input);
 
     let mut mappings = Vec::<(usize, usize, (usize, (i64, i64, i64)))>::new();
     let mut unsolved = (1..sensors.len()).collect::<Vec<usize>>();
     let mut find_maps_to: Vec::<usize> = vec![0];
     while !unsolved.is_empty() {
-        println!("unsolved = {:?}", unsolved);
-        println!("find_maps_to = {:?}\n", find_maps_to);
+        //println!("unsolved = {:?}", unsolved);
+        //println!("find_maps_to = {:?}\n", find_maps_to);
 
         let mut new_find_maps_to = Vec::<usize>::new();
 
@@ -107,7 +107,7 @@ fn day_19_part_1(input: &str) -> usize {
         find_maps_to = new_find_maps_to;
     }
 
-    println!("mappings:\n{:#?}\n", mappings);
+    //println!("mappings:\n{:#?}\n", mappings);
 
     let mut transforms = Vec::<Vec<(usize, (i64, i64, i64))>>::new();
     for idx in 1..sensors.len() {
@@ -127,7 +127,7 @@ fn day_19_part_1(input: &str) -> usize {
         transforms.push(transform);
     }
 
-    println!("transforms:\n{:#?}\n", transforms);
+    //println!("transforms:\n{:#?}\n", transforms);
 
     let mut unique_beacons = sensors[0].clone();
     for idx in 1..sensors.len() {
@@ -144,9 +144,33 @@ fn day_19_part_1(input: &str) -> usize {
         unique_beacons.dedup();
     }
 
-    println!("unique_beacons:\n{:#?}\n", unique_beacons);
+    //println!("unique_beacons:\n{:#?}\n", unique_beacons);
 
-    return unique_beacons.len();
+    let mut origins: Vec::<(i64, i64, i64)> = vec![(0, 0, 0)];
+    for transform in transforms {
+        let mut origin = (0i64, 0i64, 0i64);
+        for trans in transform {
+            let t_idx = trans.0;
+            let ts = trans.1;
+            origin = transform_coord(origin, t_idx);
+            origin = (origin.0 + ts.0, origin.1 + ts.1, origin.2 + ts.2);
+        }
+        origins.push(origin);
+    }
+
+    //println!("origins = {:#?}", origins);
+
+    let mut max_dist: i64 = 0;
+    for o0 in 0..origins.len()-1 {
+        for o1 in 1..origins.len() {
+            let dist = i64::abs(origins[o0].0 - origins[o1].0) + i64::abs(origins[o0].1 - origins[o1].1) + i64::abs(origins[o0].2 - origins[o1].2);
+            max_dist = i64::max(max_dist, dist);
+        }
+    }
+
+    //println!("max_dist = {}", max_dist);
+
+    return (unique_beacons.len(), max_dist);
 }
 
 #[cfg(test)]
@@ -154,7 +178,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn example_day_19_part_1() {
+    fn example_day_19_part_1_2() {
         let input =
 r#"--- scanner 0 ---
 404,-588,-901
@@ -293,13 +317,14 @@ r#"--- scanner 0 ---
 -652,-548,-490
 30,-46,-14"#;
 
-        let ans = day_19_part_1(&input);
+        let (num_beacons, max_dist) = day_19_part_1_2(&input);
 
-        assert_eq!(ans, 79);
+        assert_eq!(num_beacons, 79);
+        assert_eq!(max_dist, 3621);
     }
 
     #[test]
-    fn test_day_19_part_1() {
+    fn test_day_19_part_1_2() {
         let input =
 r#"--- scanner 0 ---
 -706,-587,-470
@@ -1302,8 +1327,9 @@ r#"--- scanner 0 ---
 -765,637,-594
 673,-564,-452"#;
 
-        let ans = day_19_part_1(&input);
+        let (num_beacons, max_dist) = day_19_part_1_2(&input);
 
-        println!("{}", ans);
+        assert_eq!(num_beacons, 440);
+        assert_eq!(max_dist, 13382);
     }
 }
