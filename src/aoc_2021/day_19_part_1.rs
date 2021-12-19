@@ -1,4 +1,5 @@
 fn transform_coord(p: (i64, i64, i64), t: usize) -> (i64, i64, i64) {
+    let mut q = p;
     // Facing:
     // x, y, z
     // -x, -y, z
@@ -6,7 +7,6 @@ fn transform_coord(p: (i64, i64, i64), t: usize) -> (i64, i64, i64) {
     // y, -x, z
     // -z, y, x
     // z, y, -x
-    let mut q = p;
     let facing_t = t % 6;
     match facing_t {
         0 => (),
@@ -20,16 +20,15 @@ fn transform_coord(p: (i64, i64, i64), t: usize) -> (i64, i64, i64) {
 
     // Orientation
     // x, y, z
-    // x, y, -z
-    // x, -y, z
+    // x, z, -y
     // x, -y, -z
-    let mut q = q;
+    // x, -z, y
     let orientation_t = t / 6;
     match orientation_t {
         0 => (),
-        1 => q = (q.0, q.1, -q.2),
-        2 => q = (q.0, -q.1, q.2),
-        3 => q = (q.0, -q.1, -q.2),
+        1 => q = (q.0, q.2, -q.1),
+        2 => q = (q.0, -q.1, -q.2),
+        3 => q = (q.0, -q.2, q.1),
         _ => (),
     }
 
@@ -56,14 +55,7 @@ fn parse_input(input: &str) -> Vec::<Vec<(i64, i64, i64)>> {
     return sensors;
 }
 
-#[allow(dead_code)]
-fn day_19_part_1(input: &str) -> i64 {
-    let sensors = parse_input(input);
-    let mut unique_beacons = Vec::<(i64, i64, i64)>::new();
-
-    let s0 = &sensors[0];
-    let s1 = &sensors[1];
-
+fn get_sensor_mapping(s0: &Vec::<(i64, i64, i64)>, s1: &Vec::<(i64, i64, i64)>) -> Option<(usize, (i64, i64, i64))> {
     for s0_b in s0.iter() {
         for t in 0..24 {
             let mut tf_s1 = s1.iter().map(|&beacon| transform_coord(beacon, t)).collect::<Vec<(i64, i64, i64)>>();
@@ -73,12 +65,52 @@ fn day_19_part_1(input: &str) -> i64 {
                 ts_s1.retain(|beacon| beacon.0 <= 1000 && beacon.1 <= 1000 && beacon.2 <= 1000);
                 ts_s1.retain(|beacon| s0.iter().find(|&other_beacon| other_beacon == beacon) != None);
                 if ts_s1.len() >= 12 {
-                    println!("{:#?}", ts_s1);
-                    return 0;
+                    //println!("{:#?}", ts_s1);
+                    //println!("{:#?}", ts);
+                    return Some((t, ts));
                 }                
             }
         }
     }
+    return None;
+}
+
+#[allow(dead_code)]
+fn day_19_part_1(input: &str) -> i64 {
+    let sensors = parse_input(input);
+
+    let mut mappings = Vec::<(usize, usize, (usize, (i64, i64, i64)))>::new();
+
+    for s0_idx in 0..sensors.len()-1 {
+        for s1_idx in s0_idx+1..sensors.len() {
+            let s0 = &sensors[s0_idx];
+            let s1 = &sensors[s1_idx];
+            if let Some(mapping) = get_sensor_mapping(s0, s1) {
+                mappings.push((s1_idx, s0_idx, mapping));
+            }
+        }
+    }
+
+    println!("{:#?}", mappings);
+
+    // let s0 = &sensors[0];
+    // let s1 = &sensors[1];
+    // for s0_b in s0.iter() {
+    //     for t in 0..24 {
+    //         let mut tf_s1 = s1.iter().map(|&beacon| transform_coord(beacon, t)).collect::<Vec<(i64, i64, i64)>>();
+    //         for s1_b in tf_s1.iter() {
+    //             let ts = (s0_b.0 - s1_b.0, s0_b.1 - s1_b.1, s0_b.2 - s1_b.2);
+    //             let mut ts_s1 = tf_s1.iter().map(|beacon| (beacon.0 + ts.0, beacon.1 + ts.1, beacon.2 + ts.2)).collect::<Vec<_>>();
+    //             ts_s1.retain(|beacon| beacon.0 <= 1000 && beacon.1 <= 1000 && beacon.2 <= 1000);
+    //             ts_s1.retain(|beacon| s0.iter().find(|&other_beacon| other_beacon == beacon) != None);
+    //             if ts_s1.len() >= 12 {
+    //                 println!("{:#?}", ts_s1);
+    //                 println!("{:#?}", ts);
+    //                 return 0;
+    //             }                
+    //         }
+    //     }
+    // }
 
     return 0;
 }
@@ -229,7 +261,7 @@ r#"--- scanner 0 ---
 
         let ans = day_19_part_1(&input);
 
-        assert_eq!(ans, 4140);
+        assert_eq!(ans, 79);
     }
 
     #[test]
