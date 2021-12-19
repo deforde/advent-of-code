@@ -58,7 +58,7 @@ fn parse_input(input: &str) -> Vec::<Vec<(i64, i64, i64)>> {
 fn get_sensor_mapping(s0: &Vec::<(i64, i64, i64)>, s1: &Vec::<(i64, i64, i64)>) -> Option<(usize, (i64, i64, i64))> {
     for s0_b in s0.iter() {
         for t in 0..24 {
-            let mut tf_s1 = s1.iter().map(|&beacon| transform_coord(beacon, t)).collect::<Vec<(i64, i64, i64)>>();
+            let tf_s1 = s1.iter().map(|&beacon| transform_coord(beacon, t)).collect::<Vec<(i64, i64, i64)>>();
             for s1_b in tf_s1.iter() {
                 let ts = (s0_b.0 - s1_b.0, s0_b.1 - s1_b.1, s0_b.2 - s1_b.2);
                 let mut ts_s1 = tf_s1.iter().map(|beacon| (beacon.0 + ts.0, beacon.1 + ts.1, beacon.2 + ts.2)).collect::<Vec<_>>();
@@ -75,36 +75,36 @@ fn get_sensor_mapping(s0: &Vec::<(i64, i64, i64)>, s1: &Vec::<(i64, i64, i64)>) 
     return None;
 }
 
-fn find_mappings_to_idx(sensors: &Vec::<Vec<(i64, i64, i64)>>, s0_idx: usize, excluded: &Vec::<usize>) -> Vec<(usize, usize, (usize, (i64, i64, i64)))> {
-    let mut mappings = Vec::<(usize, usize, (usize, (i64, i64, i64)))>::new();
-    for s1_idx in 1..sensors.len() {
-        if s1_idx != s0_idx && excluded.iter().find(|&&idx| idx == s1_idx) == None {
-            let s0 = &sensors[s0_idx];
-            let s1 = &sensors[s1_idx];
-            if let Some(mapping) = get_sensor_mapping(s0, s1) {
-                mappings.push((s1_idx, s0_idx, mapping));
-            }
-        }
-    }
-    return mappings;
-}
-
 #[allow(dead_code)]
-fn day_19_part_1(input: &str) -> i64 {
+fn day_19_part_1(input: &str) -> usize {
     let sensors = parse_input(input);
 
     let mut mappings = Vec::<(usize, usize, (usize, (i64, i64, i64)))>::new();
-    
-    for s0_idx in 0..sensors.len() {
-        for s1_idx in 0..sensors.len() {
-            if s0_idx != s1_idx {
+    let mut unsolved = (1..sensors.len()).collect::<Vec<usize>>();
+    let mut find_maps_to: Vec::<usize> = vec![0];
+    while !unsolved.is_empty() {
+        println!("unsolved = {:?}", unsolved);
+        println!("find_maps_to = {:?}\n", find_maps_to);
+
+        let mut new_find_maps_to = Vec::<usize>::new();
+
+        for s0_idx in find_maps_to {
+            let mut new_unsolved = unsolved.clone();
+
+            for s1_idx in unsolved {
                 let s0 = &sensors[s0_idx];
                 let s1 = &sensors[s1_idx];
                 if let Some(mapping) = get_sensor_mapping(s0, s1) {
                     mappings.push((s1_idx, s0_idx, mapping));
+                    new_unsolved.retain(|&idx| idx != s1_idx);
+                    new_find_maps_to.push(s1_idx);
                 }
             }
+
+            unsolved = new_unsolved;
         }
+
+        find_maps_to = new_find_maps_to;
     }
 
     println!("mappings:\n{:#?}\n", mappings);
@@ -119,6 +119,9 @@ fn day_19_part_1(input: &str) -> i64 {
                 steps.push(mapping.1);
                 transform.push(mapping.2);
             }
+            else {
+                panic!();
+            }
         }
 
         transforms.push(transform);
@@ -126,7 +129,24 @@ fn day_19_part_1(input: &str) -> i64 {
 
     println!("transforms:\n{:#?}\n", transforms);
 
-    return 0;
+    let mut unique_beacons = sensors[0].clone();
+    for idx in 1..sensors.len() {
+        let mut beacons = sensors[idx].clone();
+        for transform in transforms[idx - 1].iter() {
+            let t_idx = transform.0;
+            let ts = transform.1;
+            beacons = beacons.iter().map(|&beacon| transform_coord(beacon, t_idx))
+                                    .map(|beacon| (beacon.0 + ts.0, beacon.1 + ts.1, beacon.2 + ts.2))
+                                    .collect::<Vec<_>>();
+        }
+        unique_beacons.extend(beacons);
+        unique_beacons.sort();
+        unique_beacons.dedup();
+    }
+
+    println!("unique_beacons:\n{:#?}\n", unique_beacons);
+
+    return unique_beacons.len();
 }
 
 #[cfg(test)]
