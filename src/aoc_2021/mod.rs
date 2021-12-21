@@ -56,3 +56,6 @@ mod day_19_part_1_2;
 
 mod day_20_part_1;
 mod day_20_part_2;
+
+mod day_21_part_1;
+mod day_21_part_2;
