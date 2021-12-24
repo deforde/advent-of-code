@@ -65,3 +65,6 @@ mod day_22_part_2;
 
 mod day_23_part_1;
 mod day_23_part_2;
+
+mod day_24_part_1;
+mod day_24_part_2;
