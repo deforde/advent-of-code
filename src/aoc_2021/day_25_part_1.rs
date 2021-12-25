@@ -9,6 +9,7 @@ fn parse_input(input: &str) -> Vec::<Vec<char>> {
     return grid;
 }
 
+#[allow(dead_code)]
 fn print_grid(grid: &Vec::<Vec<char>>) {
     for row in grid {
         println!("{:?}", row);
